@@ -65,14 +65,14 @@ export default function Home() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
-              to="https://project-management-system-1emk.vercel.app/signup"
+              to="https://taskpilot-dashboard.vercel.app/signup"
               className="group inline-flex items-center px-8 py-4 bg-white text-green-600 rounded-xl font-semibold text-lg hover:bg-gray-50 transition-all duration-300 hover:scale-105 shadow-xl"
             >
               Start Your Journey
               <Rocket size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
-              to="https://project-management-system-1emk.vercel.app/login"
+              to="https://taskpilot-dashboard.vercel.app/login"
               className="inline-flex items-center px-8 py-4 border-2 border-white text-white rounded-xl font-semibold text-lg hover:bg-white hover:text-green-600 transition-all duration-300"
             >
               Sign In
@@ -345,7 +345,7 @@ export default function Home() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
-              to="https://project-management-system-1emk.vercel.app/signup"
+              to="https://taskpilot-dashboard.vercel.app/signup"
               className="group inline-flex items-center px-8 py-4 bg-white text-green-600 rounded-xl font-semibold text-lg hover:bg-gray-50 transition-all duration-300 hover:scale-105 shadow-xl"
             >
               Start Your Journey

@@ -9,7 +9,7 @@ import { toast } from "react-hot-toast";
 import { getAvatarUrl } from "../utils/avatarUtils";
 import Select from 'react-select';
 
-const API = process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-o3bm.onrender.com/api';
+const API = process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com/api';
 
 const roleIcons = {
   Admin: <ShieldCheck className="inline-block w-4 h-4 text-red-500 mr-1" />,

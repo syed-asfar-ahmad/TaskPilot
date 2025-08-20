@@ -35,7 +35,7 @@ export default function About() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
-              to="https://project-management-system-1emk.vercel.app/signup"
+              to="https://taskpilot-dashboard.vercel.app/signup"
               className="group inline-flex items-center px-8 py-4 bg-green-600 text-white rounded-xl font-semibold text-lg hover:bg-green-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
             >
               Get Started
@@ -240,7 +240,7 @@ export default function About() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
-              to="https://project-management-system-1emk.vercel.app/signup"
+              to="https://taskpilot-dashboard.vercel.app/signup"
               className="group inline-flex items-center px-8 py-4 bg-white text-green-600 rounded-xl font-semibold text-lg hover:bg-gray-50 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
             >
               Get Started Free

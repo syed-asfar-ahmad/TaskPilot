@@ -62,7 +62,7 @@ export default function Features() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
-              to="https://project-management-system-1emk.vercel.app/signup"
+              to="https://taskpilot-dashboard.vercel.app/signup"
               className="group inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold text-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-300 hover:scale-105 shadow-lg"
             >
               Get Started Now
@@ -426,7 +426,7 @@ export default function Features() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
-              to="https://project-management-system-1emk.vercel.app/signup"
+              to="https://taskpilot-dashboard.vercel.app/signup"
               className="group inline-flex items-center px-8 py-4 bg-white text-green-600 rounded-xl font-semibold text-lg hover:bg-gray-50 transition-all duration-300 hover:scale-105 shadow-xl"
             >
               Start Using Now

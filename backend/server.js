@@ -18,10 +18,9 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "http://localhost:3001",
   "http://localhost:5173",
-  "https://project-management-system-1emk.vercel.app",
-  "https://project-management-system-navy.vercel.app",
+  "https://taskpilot-dashboard.vercel.app",
+  "https://taskpilot-website.vercel.app",
 ];
 
 app.use(cors({

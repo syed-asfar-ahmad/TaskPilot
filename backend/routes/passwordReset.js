@@ -40,7 +40,7 @@ router.post('/forgot-password', async (req, res) => {
       const isProduction = process.env.NODE_ENV === 'production';
       if (isProduction) {
         // Production fallback - replace with your actual frontend URL
-        frontendUrl = 'https://your-frontend-domain.com';
+        frontendUrl = 'https://taskpilot-dashboard.vercel.app';
       } else {
         frontendUrl = 'http://localhost:3000';
       }

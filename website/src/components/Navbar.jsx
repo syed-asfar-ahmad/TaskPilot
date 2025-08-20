@@ -96,13 +96,13 @@ export default function Navbar() {
           {/* Desktop Buttons - Compact */}
           <div className="hidden md:flex items-center space-x-2">
             <a 
-              href="https://project-management-system-1emk.vercel.app/login" 
+              href="https://taskpilot-dashboard.vercel.app/login" 
               className={buttonClass(false)}
             >
               Login
             </a>
             <a 
-              href="https://project-management-system-1emk.vercel.app/signup" 
+              href="https://taskpilot-dashboard.vercel.app/signup" 
               className={buttonClass(true)}
             >
               Sign Up
@@ -176,13 +176,13 @@ export default function Navbar() {
             
             <div className="pt-3 border-t border-gray-100 space-y-1">
               <a 
-                href="https://project-management-system-1emk.vercel.app/login" 
+                href="https://taskpilot-dashboard.vercel.app/login" 
                 className="block px-3 py-2 text-green-600 font-semibold border-2 border-green-600 rounded-lg hover:bg-green-600 hover:text-white transition-all duration-200 text-center"
               >
                 Login
               </a>
               <a 
-                href="https://project-management-system-1emk.vercel.app/signup" 
+                href="https://taskpilot-dashboard.vercel.app/signup" 
                 className="block px-3 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 text-center shadow-lg"
               >
                 Sign Up
