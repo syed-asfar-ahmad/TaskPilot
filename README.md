@@ -1,13 +1,7 @@
 ## Live Demo
 
-- **[Dashboard](https://project-management-system-1emk.vercel.app/)**
-- **[Website](https://project-management-system-navy.vercel.app/)**
-
-## Default Admin Account
-
-- **Email**: `ahmad@example.com`
-- **Password**: `123456`
-- **Role**: Admin
+- **[Dashboard](https://taskpilot-dashboard.vercel.app/)**
+- **[Website](https://taskpilot-website.vercel.app/)**
 
 ## Features
 
