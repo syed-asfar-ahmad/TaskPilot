@@ -13,6 +13,8 @@ export default function ContactMessagesPage() {
   const [showModal, setShowModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [contactsPerPage] = useState(10);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [contactToDelete, setContactToDelete] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,14 +51,23 @@ export default function ContactMessagesPage() {
     }
   };
 
-  const deleteContact = async (id) => {
+  const handleDeleteClick = (contact) => {
+    setContactToDelete(contact);
+    setShowDeleteConfirm(true);
+  };
+
+  const deleteContact = async () => {
+    if (!contactToDelete) return;
+    
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com/api'}/contact/admin/${id}`, {
+      await axios.delete(`${process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com/api'}/contact/admin/${contactToDelete._id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchContacts(); // Refresh the list
       toast.success('Message deleted successfully');
+      setShowDeleteConfirm(false);
+      setContactToDelete(null);
     } catch (error) {
       toast.error('Failed to delete message');
     }
@@ -313,7 +324,7 @@ export default function ContactMessagesPage() {
                                   </div>
                                 </div>
                                 <button
-                                  onClick={() => deleteContact(contact._id)}
+                                  onClick={() => handleDeleteClick(contact)}
                                   className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors hover:scale-105 transform duration-200 shadow-sm hover:shadow-md"
                                   title="Delete Message"
                                 >
@@ -389,7 +400,7 @@ export default function ContactMessagesPage() {
                                 </div>
                               </div>
                               <button
-                                onClick={() => deleteContact(contact._id)}
+                                onClick={() => handleDeleteClick(contact)}
                                 className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors hover:scale-105 transform duration-200 shadow-sm hover:shadow-md"
                                 title="Delete Message"
                               >
@@ -555,6 +566,48 @@ export default function ContactMessagesPage() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && contactToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4" onClick={e => { if (e.target === e.currentTarget) setShowDeleteConfirm(false); }}>
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 transform transition-all">
+            {/* Dialog Header */}
+            <div className="flex items-center gap-3 p-6 border-b border-gray-200">
+              <div className="w-10 h-10 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center">
+                <Trash2 size={20} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-800">Delete Message</h3>
+                <p className="text-sm text-gray-600">Are you sure you want to delete this message?</p>
+              </div>
+            </div>
+            {/* Dialog Content */}
+            <div className="p-6">
+              <p className="text-gray-700 mb-4">
+                This action will permanently delete the message from <strong>{contactToDelete.name}</strong> about <strong>"{contactToDelete.subject}"</strong>.
+              </p>
+              <p className="text-sm text-gray-500 bg-gray-50 p-3 rounded-lg">
+                Warning: This action cannot be undone. The message will be permanently removed from the system.
+              </p>
+            </div>
+            {/* Dialog Actions */}
+            <div className="flex gap-3 p-6 border-t border-gray-200">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={deleteContact}
+                className="flex-1 px-4 py-2.5 text-white rounded-lg font-medium transition-colors bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
+              >
+                Delete
+              </button>
             </div>
           </div>
         </div>

@@ -32,7 +32,9 @@ export default function Contact() {
     setStatus("");
 
     try {
-      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com/api';
+      // Always ensure we have the correct API endpoint
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com';
+      const apiUrl = baseUrl.includes('/api') ? baseUrl : `${baseUrl}/api`;
       await axios.post(`${apiUrl}/contact`, formData);
       setStatus("success");
       setFormData({ name: "", email: "", subject: "", message: "" });
