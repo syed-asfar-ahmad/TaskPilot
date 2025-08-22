@@ -18,7 +18,7 @@ import {
   Users
 } from "lucide-react";
 
-const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+const API = process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com/api';
 
 function Signup() {
   const navigate = useNavigate();

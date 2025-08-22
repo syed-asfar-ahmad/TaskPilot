@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from 'react-hot-toast';
 
 // Get backend base URL from environment
-const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+const API = process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com/api';
 
 // Create the context
 const AuthContext = createContext();

@@ -3,7 +3,7 @@ import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { toast } from 'react-hot-toast';
 
-const API = process.env.REACT_APP_API_BASE_URL;
+const API = process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com/api';
 
 function ProjectList() {
   const { token } = useAuth();

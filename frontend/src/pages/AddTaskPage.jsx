@@ -8,7 +8,7 @@ import Select from 'react-select';
 import { ClipboardPlus, CalendarDays, FileText, ArrowLeft, AlignLeft, ListChecks, Users, FolderOpen, Clock, PlayCircle, CheckCircle, ChevronLeft, ChevronRight, AlertCircle, AlertTriangle, AlertOctagon } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
-const API = process.env.REACT_APP_API_BASE_URL;
+const API = process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com/api';
 
 function AddTaskPage() {
   const { token, user } = useAuth();

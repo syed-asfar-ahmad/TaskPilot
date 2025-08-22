@@ -13,7 +13,7 @@ import { useAuth } from "../context/AuthContext";
 
 import "../styles/calendar.css";
 
-const API = process.env.REACT_APP_API_BASE_URL;
+const API = process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com/api';
 
 function TaskCalendarPage() {
   const [events, setEvents] = useState([]);

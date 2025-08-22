@@ -32,7 +32,7 @@ export default function Contact() {
     setStatus("");
 
     try {
-      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com/api';
       await axios.post(`${apiUrl}/contact`, formData);
       setStatus("success");
       setFormData({ name: "", email: "", subject: "", message: "" });

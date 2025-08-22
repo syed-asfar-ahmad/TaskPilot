@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
-const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+const API = process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com/api';
 
 function NotificationBell() {
   const { token } = useAuth();

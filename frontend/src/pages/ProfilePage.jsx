@@ -62,8 +62,8 @@ function ProfilePage() {
     profilePicture: "",
   });
 
-  const API = process.env.REACT_APP_API_BASE_URL;
-  const IMG = process.env.REACT_APP_API_BASE_URL.replace("/api", "");
+  const API = process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com/api';
+const IMG = (process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com/api').replace("/api", "");
 
   const [file, setFile] = useState(null);
   const token = localStorage.getItem("token");

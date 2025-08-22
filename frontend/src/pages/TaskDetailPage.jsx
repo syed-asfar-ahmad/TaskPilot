@@ -30,7 +30,7 @@ import Navbar from '../components/AuthNavbar';
 import Footer from '../components/Footer';
 import { toast } from 'react-hot-toast';
 
-const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+const API = process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com/api';
 
 function TaskDetailPage() {
   const { id } = useParams();

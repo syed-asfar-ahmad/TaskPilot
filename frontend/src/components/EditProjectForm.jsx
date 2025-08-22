@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const API = process.env.REACT_APP_API_BASE_URL;
+const API = process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com/api';
 
 function EditProjectForm({ project, token, onSuccess, onCancel }) {
   const [teamOptions, setTeamOptions] = useState([]);

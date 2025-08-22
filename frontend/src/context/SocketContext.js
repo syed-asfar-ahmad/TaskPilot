@@ -32,7 +32,7 @@ export const SocketProvider = ({ children }) => {
     if (!token) return;
 
     // Create socket connection
-    const newSocket = io(process.env.REACT_APP_API_URL || 'http://localhost:5000', {
+    const newSocket = io(process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com/api', {
       auth: {
         token: token
       },

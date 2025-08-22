@@ -4,7 +4,7 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
 
-const API = process.env.REACT_APP_API_BASE_URL;
+const API = process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com/api';
 
 function ForgetPassword() {
   const [email, setEmail] = useState('');

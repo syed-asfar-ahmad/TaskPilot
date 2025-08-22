@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = process.env.REACT_APP_API_BASE_URL;
+const API = process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com/api';
 
 export const getAllProjects = async (token) => {
   return await axios.get(`${API}/projects`, {
