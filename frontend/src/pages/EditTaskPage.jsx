@@ -549,9 +549,9 @@ function EditTaskPage() {
                       {option.profilePicture ? (
                         <img src={option.profilePicture} alt={option.label} className="w-5 h-5 rounded-full mr-2" />
                       ) : (
-                        <span className="w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 text-xs font-semibold">
-                          {option.label.split(' ')[0][0]}
-                        </span>
+                        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white text-xs font-semibold mr-2">
+                          {option.label.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                        </div>
                       )}
                       <span>{option.label}</span>
                     </div>
@@ -561,9 +561,9 @@ function EditTaskPage() {
                       {option.profilePicture ? (
                         <img src={option.profilePicture} alt={option.label} className="w-5 h-5 rounded-full mr-2" />
                       ) : (
-                        <span className="w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 text-xs font-semibold">
-                          {option.label.split(' ')[0][0]}
-                        </span>
+                        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white text-xs font-semibold mr-2">
+                          {option.label.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                        </div>
                       )}
                       <span>{option.label}</span>
                     </div>

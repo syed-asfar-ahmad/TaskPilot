@@ -16,6 +16,9 @@ import {
   Camera,
   Save,
   ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  X,
 } from "lucide-react";
 import Navbar from "../components/AuthNavbar";
 import Footer from "../components/Footer";
@@ -67,6 +70,13 @@ const IMG = (process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onr
 
   const [file, setFile] = useState(null);
   const token = localStorage.getItem("token");
+  
+  // Date picker state
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [isYearPickerOpen, setIsYearPickerOpen] = useState(false);
+  const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
 
   const fetchProfile = async () => {
     setLoading(true);
@@ -175,6 +185,115 @@ const IMG = (process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onr
     toast.success("Image selected successfully");
   };
 
+  // Calendar functions
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDay = firstDay.getDay();
+    
+    const days = [];
+    
+    // Add empty days for padding
+    for (let i = 0; i < startingDay; i++) {
+      days.push(null);
+    }
+    
+    // Add days of the month
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(new Date(year, month, i));
+    }
+    
+    return days;
+  };
+
+  const handleDateSelect = (date, e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setSelectedDate(date);
+    setProfile({ ...profile, dateOfBirth: date.toISOString().split('T')[0] });
+    setIsDatePickerOpen(false);
+  };
+
+  const nextMonth = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+  };
+
+  const prevMonth = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+  };
+
+  const isToday = (date) => {
+    if (!date) return false;
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  };
+
+  const isSelected = (date) => {
+    if (!date || !selectedDate) return false;
+    return date.toDateString() === selectedDate.toDateString();
+  };
+
+  const isFutureDate = (date) => {
+    if (!date) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date > today;
+  };
+
+  // Year and month selection functions
+  const handleYearSelect = (year, e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setCurrentDate(new Date(year, currentDate.getMonth(), 1));
+    setIsYearPickerOpen(false);
+  };
+
+  const handleMonthSelect = (month, e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setCurrentDate(new Date(currentDate.getFullYear(), month, 1));
+    setIsMonthPickerOpen(false);
+  };
+
+  const getYearRange = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let year = currentYear - 100; year <= currentYear; year++) {
+      years.push(year);
+    }
+    return years.reverse();
+  };
+
+  const getMonths = () => {
+    return [
+      { value: 0, name: 'Jan' },
+      { value: 1, name: 'Feb' },
+      { value: 2, name: 'Mar' },
+      { value: 3, name: 'Apr' },
+      { value: 4, name: 'May' },
+      { value: 5, name: 'Jun' },
+      { value: 6, name: 'Jul' },
+      { value: 7, name: 'Aug' },
+      { value: 8, name: 'Sep' },
+      { value: 9, name: 'Oct' },
+      { value: 10, name: 'Nov' },
+      { value: 11, name: 'Dec' }
+    ];
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -182,6 +301,27 @@ const IMG = (process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onr
   useEffect(() => {
     fetchProfile();
   }, []);
+
+  // Initialize selected date when profile loads
+  useEffect(() => {
+    if (profile.dateOfBirth) {
+      setSelectedDate(new Date(profile.dateOfBirth));
+    }
+  }, [profile.dateOfBirth]);
+
+  // Click outside handler for date picker
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isDatePickerOpen && !event.target.closest('.date-picker')) {
+        setIsDatePickerOpen(false);
+        setIsYearPickerOpen(false);
+        setIsMonthPickerOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isDatePickerOpen]);
 
   if (loading) {
     return (
@@ -309,15 +449,23 @@ const IMG = (process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onr
                   <div className="flex items-center gap-4 mb-6">
                     <div className="relative group">
                       <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-blue-500 rounded-full blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      <img
-                        src={
-                          file
-                            ? URL.createObjectURL(file)
-                            : getAvatarUrl(profile.profilePicture, profile.name, 96)
-                        }
-                        alt="Profile"
-                        className="relative w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg group-hover:scale-105 transition-transform duration-300"
-                      />
+                      {file || profile.profilePicture ? (
+                        <img
+                          src={
+                            file
+                              ? URL.createObjectURL(file)
+                              : getAvatarUrl(profile.profilePicture, profile.name, 96)
+                          }
+                          alt="Profile"
+                          className="relative w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="relative w-24 h-24 rounded-full border-4 border-white shadow-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                          <span className="text-white font-bold text-2xl">
+                            {profile.name ? profile.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+                          </span>
+                        </div>
+                      )}
                       <label className="absolute -bottom-1 -right-1 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-green-700 transition-colors duration-200 shadow-lg">
                         <Camera size={14} />
                         <input
@@ -399,17 +547,195 @@ const IMG = (process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onr
                   </div>
 
                   {/* Date of Birth */}
-                  <div>
+                  <div className="relative date-picker">
                     <label className="font-semibold text-gray-700 mb-2 block text-sm">Date of Birth</label>
-                    <div className="flex items-center bg-white border border-gray-200 rounded-lg px-3 py-2 focus-within:border-green-500 focus-within:ring-2 focus-within:ring-green-200 transition-all duration-200">
-                      <CalendarDays size={18} className="text-gray-400 mr-2" />
+                    <div className="relative">
                       <input
-                        type="date"
+                        type="text"
                         name="dateOfBirth"
-                        value={profile.dateOfBirth?.substring(0, 10)}
-                        onChange={handleChange}
-                        className="w-full outline-none text-gray-700 bg-transparent text-sm"
+                        value={selectedDate 
+                          ? selectedDate.toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })
+                          : ''
+                        }
+                        placeholder="Select your date of birth"
+                        readOnly
+                        onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white hover:bg-gray-50 cursor-pointer"
                       />
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <CalendarDays className="w-5 h-5 text-gray-400" />
+                      </div>
+
+                                                {/* Calendar Dropdown - Exact design from project/task forms */}
+                          {isDatePickerOpen && (
+                            <div className="absolute top-0 right-0 -mt-20 w-64 bg-white border border-gray-200 rounded-xl shadow-2xl transform translate-x-full" style={{ zIndex: 9999999 }}>
+                              {/* Year Picker Dropdown */}
+                              {isYearPickerOpen && (
+                                <div className="absolute bottom-full left-0 right-0 mb-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+                                  <div className="p-2">
+                                    <div className="grid grid-cols-3 gap-1">
+                                      {getYearRange().map((year) => (
+                                        <button
+                                          key={year}
+                                          type="button"
+                                          onClick={(e) => handleYearSelect(year, e)}
+                                          className={`px-2 py-1 text-xs rounded hover:bg-green-50 hover:text-green-700 transition-colors ${
+                                            year === currentDate.getFullYear() 
+                                              ? 'bg-green-500 text-white' 
+                                              : 'text-gray-700'
+                                          }`}
+                                        >
+                                          {year}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Month Picker Dropdown */}
+                              {isMonthPickerOpen && (
+                                <div className="absolute bottom-full left-0 right-0 mb-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                                  <div className="p-2">
+                                    <div className="grid grid-cols-3 gap-1">
+                                      {getMonths().map((month) => (
+                                        <button
+                                          key={month.value}
+                                          type="button"
+                                          onClick={(e) => handleMonthSelect(month.value, e)}
+                                          className={`px-2 py-1 text-xs rounded hover:bg-green-50 hover:text-green-700 transition-colors ${
+                                            month.value === currentDate.getMonth() 
+                                              ? 'bg-green-500 text-white' 
+                                              : 'text-gray-700'
+                                          }`}
+                                        >
+                                          {month.name}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Calendar Header */}
+                              <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-3 rounded-t-xl">
+                            <div className="flex items-center justify-between">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  prevMonth(e);
+                                }}
+                                className="p-1.5 hover:bg-green-600 rounded-lg transition-colors"
+                              >
+                                <ChevronLeft size={16} />
+                              </button>
+                              <div className="flex items-center space-x-1">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setIsMonthPickerOpen(!isMonthPickerOpen);
+                                    setIsYearPickerOpen(false);
+                                  }}
+                                  className="px-2 py-1 hover:bg-green-600 rounded text-sm font-semibold transition-colors"
+                                >
+                                  {currentDate.toLocaleDateString('en-US', { month: 'short' })}
+                                </button>
+                                <span className="text-sm font-semibold">-</span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setIsYearPickerOpen(!isYearPickerOpen);
+                                    setIsMonthPickerOpen(false);
+                                  }}
+                                  className="px-2 py-1 hover:bg-green-600 rounded text-sm font-semibold transition-colors"
+                                >
+                                  {currentDate.getFullYear()}
+                                </button>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  nextMonth(e);
+                                }}
+                                className="p-1.5 hover:bg-green-600 rounded-lg transition-colors"
+                              >
+                                <ChevronRight size={16} />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Calendar Body */}
+                          <div className="p-3">
+                            {/* Day Headers */}
+                            <div className="grid grid-cols-7 gap-0.5 mb-2">
+                              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
+                                <div key={day} className="text-center text-xs font-medium text-gray-500 py-1">{day}</div>
+                              ))}
+                            </div>
+                            {/* Calendar Days */}
+                            <div className="grid grid-cols-7 gap-0.5">
+                              {getDaysInMonth(currentDate).map((date, index) => (
+                                <div key={index} className="aspect-square">
+                                  {date ? (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        if (!isFutureDate(date)) {
+                                          handleDateSelect(date, e);
+                                        }
+                                      }}
+                                      disabled={isFutureDate(date)}
+                                      className={`w-full h-full rounded-md text-xs font-medium transition-all duration-200 flex items-center justify-center
+                                        ${isSelected(date) 
+                                          ? 'bg-green-500 text-white shadow-md' 
+                                          : isToday(date)
+                                          ? 'bg-yellow-100 text-yellow-800 border border-yellow-300'
+                                          : isFutureDate(date)
+                                          ? 'text-gray-300 cursor-not-allowed'
+                                          : 'text-gray-700 hover:bg-green-50 hover:text-green-700 hover:border hover:border-green-200'
+                                        }`}
+                                    >
+                                      {date.getDate()}
+                                    </button>
+                                  ) : (
+                                    <div className="w-full h-full"></div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          {/* Calendar Footer */}
+                          <div className="border-t border-gray-100 p-2 bg-gray-50 rounded-b-xl">
+                            <div className="flex items-center justify-between text-xs text-gray-600">
+                              <div className="flex items-center space-x-1">
+                                <div className="w-2 h-2 bg-yellow-100 border border-yellow-300 rounded"></div>
+                                <span>Today</span>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <div className="w-2 h-2 bg-green-500 rounded"></div>
+                                <span>Selected</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+
                     </div>
                   </div>
 
@@ -457,15 +783,23 @@ const IMG = (process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onr
                     <div className="flex items-center mb-3">
                       <div className="relative mr-3">
                         <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-blue-500 rounded-full blur-lg opacity-75"></div>
-                        <img
-                          src={
-                            file
-                              ? URL.createObjectURL(file)
-                              : getAvatarUrl(profile.profilePicture, profile.name, 48)
-                          }
-                          alt={profile.name}
-                          className="relative w-12 h-12 rounded-full object-cover border-2 border-white shadow-md"
-                        />
+                        {file || profile.profilePicture ? (
+                          <img
+                            src={
+                              file
+                                ? URL.createObjectURL(file)
+                                : getAvatarUrl(profile.profilePicture, profile.name, 48)
+                            }
+                            alt={profile.name}
+                            className="relative w-12 h-12 rounded-full object-cover border-2 border-white shadow-md"
+                          />
+                        ) : (
+                          <div className="relative w-12 h-12 rounded-full border-2 border-white shadow-md bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">
+                              {profile.name ? profile.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+                            </span>
+                          </div>
+                        )}
 
                       </div>
                       

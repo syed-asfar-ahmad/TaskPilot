@@ -164,7 +164,13 @@ function AuthNavbar() {
                     alt="Profile"
                     className="w-full h-full object-cover"
                   />
-                ) : null}
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">
+                      {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="text-xs">
                 <p className="text-white font-medium">{user?.name}</p>
@@ -216,7 +222,13 @@ function AuthNavbar() {
                     alt="Profile"
                     className="w-full h-full object-cover"
                   />
-                ) : null}
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">
+                      {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+                    </span>
+                  </div>
+                )}
               </div>
               <div>
                 <p className="font-medium text-gray-800">{user?.name}</p>

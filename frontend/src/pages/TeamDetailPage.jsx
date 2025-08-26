@@ -295,11 +295,19 @@ function TeamDetailPage() {
                      <div key={member._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
                        <div className="flex items-center gap-2">
                          <div className="w-8 h-8 rounded-full overflow-hidden">
-                           <img 
-                             src={getAvatarUrl(member.profilePicture, member.name, 32)} 
-                             alt={member.name}
-                             className="w-full h-full object-cover"
-                           />
+                           {member.profilePicture ? (
+                             <img 
+                               src={member.profilePicture} 
+                               alt={member.name}
+                               className="w-full h-full object-cover"
+                             />
+                           ) : (
+                             <div className="w-full h-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                               <span className="text-white text-xs font-bold">
+                                 {member.name ? member.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+                               </span>
+                             </div>
+                           )}
                          </div>
                          <div>
                            <div className="font-semibold text-gray-800 text-sm">{member.name}</div>
@@ -330,11 +338,19 @@ function TeamDetailPage() {
                    <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
                      <div className="flex items-center gap-3">
                                                 <div className="w-12 h-12 rounded-full overflow-hidden">
-                           <img 
-                             src={getAvatarUrl(team.manager.profilePicture, team.manager.name, 48)} 
-                             alt={team.manager.name}
-                             className="w-full h-full object-cover"
-                           />
+                           {team.manager.profilePicture ? (
+                             <img 
+                               src={team.manager.profilePicture} 
+                               alt={team.manager.name}
+                               className="w-full h-full object-cover"
+                             />
+                           ) : (
+                             <div className="w-full h-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                               <span className="text-white text-sm font-bold">
+                                 {team.manager.name ? team.manager.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+                               </span>
+                             </div>
+                           )}
                          </div>
                        <div className="flex-1">
                          <h3 className="text-base font-semibold text-gray-800">{team.manager.name}</h3>

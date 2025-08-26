@@ -74,10 +74,18 @@ function AllMembersPage() {
           setAdmins(res.data.filter(u => u.role === "Admin"));
         } else if (user?.role === "Manager") {
           // Manager gets only their team members
-          const teamRes = await axios.get(`${API}/users/my-team-members`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setMembers(teamRes.data);
+          try {
+            const teamRes = await axios.get(`${API}/users/my-team-members`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            setMembers(teamRes.data);
+          } catch (teamErr) {
+            console.error('Failed to fetch team members:', teamErr);
+            // If manager is not assigned to a team, show empty list
+            setMembers([]);
+            toast.error('You are not assigned to any team yet');
+          }
+          
           // Fetch all users to get admin(s)
           const allRes = await axios.get(`${API}/users`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -458,11 +466,19 @@ function AllMembersPage() {
                       {/* Profile Image and Basic Info Row */}
                       <div className="flex items-center mb-3">
                         <div className="relative mr-3">
-                          <img
-                            src={getAvatarUrl(member.profilePicture, member.name, 56)}
-                            alt={member.name}
-                            className="relative w-14 h-14 rounded-full object-cover border-3 border-white shadow-lg transition-transform duration-300"
-                          />
+                          {member.profilePicture ? (
+                            <img
+                              src={member.profilePicture}
+                              alt={member.name}
+                              className="relative w-14 h-14 rounded-full object-cover border-3 border-white shadow-lg transition-transform duration-300"
+                            />
+                          ) : (
+                            <div className="relative w-14 h-14 rounded-full border-3 border-white shadow-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center transition-transform duration-300">
+                              <span className="text-white font-bold text-lg">
+                                {member.name ? member.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <h2 className="text-base font-bold text-gray-800 mb-1 transition-colors duration-300 truncate">
@@ -543,6 +559,7 @@ function AllMembersPage() {
           </div>
         )}
 
+
         {/* Managers Section */}
         {managers.length > 0 && (
           <div className="mb-8">
@@ -570,11 +587,19 @@ function AllMembersPage() {
                       {/* Profile Image and Basic Info Row */}
                       <div className="flex items-center mb-3">
                         <div className="relative mr-3">
-                          <img
-                            src={getAvatarUrl(member.profilePicture, member.name, 56)}
-                            alt={member.name}
-                            className="relative w-14 h-14 rounded-full object-cover border-3 border-white shadow-lg transition-transform duration-300"
-                          />
+                          {member.profilePicture ? (
+                            <img
+                              src={member.profilePicture}
+                              alt={member.name}
+                              className="relative w-14 h-14 rounded-full object-cover border-3 border-white shadow-lg transition-transform duration-300"
+                            />
+                          ) : (
+                            <div className="relative w-14 h-14 rounded-full border-3 border-white shadow-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center transition-transform duration-300">
+                              <span className="text-white font-bold text-lg">
+                                {member.name ? member.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         
                         <div className="flex-1 min-w-0">
@@ -717,7 +742,7 @@ function AllMembersPage() {
          )}
 
         {/* Team Members Section */}
-        {teamMembers.length > 0 && (
+        {teamMembers.length > 0 ? (
           <div className="mb-8">
             {!searchTerm && (
               <div className="flex items-center gap-3 mb-4">
@@ -743,11 +768,19 @@ function AllMembersPage() {
                       {/* Profile Image and Basic Info Row */}
                       <div className="flex items-center mb-3">
                         <div className="relative mr-3">
-                          <img
-                            src={getAvatarUrl(member.profilePicture, member.name, 56)}
-                            alt={member.name}
-                            className="relative w-14 h-14 rounded-full object-cover border-3 border-white shadow-lg transition-transform duration-300"
-                          />
+                          {member.profilePicture ? (
+                            <img
+                              src={member.profilePicture}
+                              alt={member.name}
+                              className="relative w-14 h-14 rounded-full object-cover border-3 border-white shadow-lg transition-transform duration-300"
+                            />
+                          ) : (
+                            <div className="relative w-14 h-14 rounded-full border-3 border-white shadow-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center transition-transform duration-300">
+                              <span className="text-white font-bold text-lg">
+                                {member.name ? member.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         
                         <div className="flex-1 min-w-0">
@@ -887,18 +920,36 @@ function AllMembersPage() {
                </div>
              )}
            </div>
+         ) : (
+           // Empty state for no team members
+           <div className="mb-8">
+             <div className="flex items-center gap-3 mb-4">
+               <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
+                 <UserCircle size={16} className="text-white" />
+               </div>
+               <h2 className="text-2xl font-bold text-gray-800">Team Members</h2>
+               <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
+                 0 members
+               </span>
+             </div>
+             <div className="w-full flex flex-col items-center justify-center py-16 min-h-[220px] bg-white rounded-xl shadow-lg border border-green-100">
+               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                 <Users size={32} className="text-gray-400" />
+               </div>
+               <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                 {user?.role === "Manager" ? "No Team Members Assigned" : "No Team Members Found"}
+               </h3>
+               <p className="text-gray-600 text-sm text-center max-w-md">
+                 {user?.role === "Manager" 
+                   ? "You don't have any team members assigned to your team yet. Contact an administrator to get team members assigned."
+                   : "There are currently no team members to display."
+                 }
+               </p>
+             </div>
+           </div>
          )}
 
-        {/* Empty State - More Compact */}
-        {members.length === 0 && !loading && (
-          <div className="text-center py-12 min-h-[180px] flex flex-col justify-center items-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Users size={32} className="text-gray-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-1">No Team Members Found</h3>
-            <p className="text-gray-600 text-sm">There are currently no team members to display.</p>
-          </div>
-        )}
+
       </main>
 
       {/* Custom Confirmation Dialog */}

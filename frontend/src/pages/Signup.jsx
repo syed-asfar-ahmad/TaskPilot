@@ -15,7 +15,11 @@ import {
   CheckCircle,
   XCircle,
   ArrowLeft,
-  Users
+  Users,
+  ChevronDown,
+  Search,
+  Mars,
+  UserCircle
 } from "lucide-react";
 
 const API = process.env.REACT_APP_API_BASE_URL || 'https://taskpilot-1-mzxb.onrender.com/api';
@@ -37,6 +41,24 @@ function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [touched, setTouched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isTeamDropdownOpen, setIsTeamDropdownOpen] = useState(false);
+  const [teamSearchTerm, setTeamSearchTerm] = useState("");
+  const [isGenderDropdownOpen, setIsGenderDropdownOpen] = useState(false);
+
+  // Click outside handler for dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isTeamDropdownOpen && !event.target.closest('.team-dropdown')) {
+        setIsTeamDropdownOpen(false);
+      }
+      if (isGenderDropdownOpen && !event.target.closest('.gender-dropdown')) {
+        setIsGenderDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isTeamDropdownOpen, isGenderDropdownOpen]);
 
   // Fetch teams for signup
   useEffect(() => {
@@ -95,6 +117,23 @@ function Signup() {
     { label: "One number (0-9)", test: (p) => /\d/.test(p) },
     { label: "One special character (!@#$%^&*)", test: (p) => /[^A-Za-z0-9]/.test(p) },
   ];
+
+  const handleTeamSelect = (teamId, teamName) => {
+    setForm({ ...form, teamId });
+    setTeamSearchTerm(teamName);
+    setIsTeamDropdownOpen(false);
+  };
+
+  const handleGenderSelect = (gender) => {
+    setForm({ ...form, gender });
+    setIsGenderDropdownOpen(false);
+  };
+
+  const filteredTeams = teams.filter(team =>
+    team.name.toLowerCase().includes(teamSearchTerm.toLowerCase())
+  );
+
+  const selectedTeam = teams.find(team => team._id === form.teamId);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100 flex items-center justify-center p-4">
@@ -212,29 +251,174 @@ function Signup() {
                 Gender <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                   <Venus className="h-4 w-4 text-gray-400" />
                 </div>
-                <select
-                  name="gender"
-                  value={form.gender}
-                  onChange={handleChange}
-                  required
-                  className="w-full pl-9 pr-8 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white appearance-none text-sm"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                    backgroundPosition: 'right 0.5rem center',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundSize: '1.5em 1.5em',
-                    paddingRight: '2rem'
+                
+                {/* Custom Gender Dropdown Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsGenderDropdownOpen(!isGenderDropdownOpen)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setIsGenderDropdownOpen(!isGenderDropdownOpen);
+                    }
                   }}
+                  className="gender-dropdown relative w-full pl-9 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm text-left hover:bg-gray-100 focus:shadow-sm"
                 >
-                  <option value="">Select Gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
+                  <span className={form.gender ? "text-gray-900" : "text-gray-500"}>
+                    {form.gender || "Select Gender"}
+                  </span>
+                  <ChevronDown 
+                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 transition-transform duration-200 ${
+                      isGenderDropdownOpen ? 'rotate-180' : ''
+                    }`} 
+                  />
+                </button>
+
+                {/* Custom Gender Dropdown Menu */}
+                {isGenderDropdownOpen && (
+                  <div className="gender-dropdown absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-hidden animate-in slide-in-from-top-2 duration-200">
+                    <div className="py-1">
+                      {[
+                        { value: "Male", label: "Male", icon: <Mars className="w-4 h-4" /> },
+                        { value: "Female", label: "Female", icon: <Venus className="w-4 h-4" /> },
+                        { value: "Other", label: "Other", icon: <UserCircle className="w-4 h-4" /> }
+                      ].map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => handleGenderSelect(option.value)}
+                          className={`w-full px-4 py-3 text-left hover:bg-green-50 active:bg-green-100 transition-all duration-150 flex items-center space-x-3 transform hover:scale-[1.01] ${
+                            form.gender === option.value ? 'bg-green-100 text-green-800 shadow-sm' : 'text-gray-700'
+                          }`}
+                        >
+                          <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white">
+                            {option.icon}
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium text-sm">{option.label}</div>
+                          </div>
+                          {form.gender === option.value && (
+                            <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
+            </div>
+
+                        {/* Team Selection Field */}
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700">
+                Select Team <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                  <Users className="h-4 w-4 text-gray-400" />
+                </div>
+                
+                {/* Custom Dropdown Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsTeamDropdownOpen(!isTeamDropdownOpen)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setIsTeamDropdownOpen(!isTeamDropdownOpen);
+                    }
+                  }}
+                  className="team-dropdown relative w-full pl-9 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm text-left hover:bg-gray-100 focus:shadow-sm"
+                >
+                  <span className={selectedTeam ? "text-gray-900" : "text-gray-500"}>
+                    {selectedTeam ? selectedTeam.name : "Choose a team"}
+                  </span>
+                  <ChevronDown 
+                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 transition-transform duration-200 ${
+                      isTeamDropdownOpen ? 'rotate-180' : ''
+                    }`} 
+                  />
+                </button>
+
+                {/* Custom Dropdown Menu */}
+                {isTeamDropdownOpen && (
+                  <div className="team-dropdown absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-hidden animate-in slide-in-from-top-2 duration-200">
+                    {/* Search Input */}
+                    <div className="p-3 border-b border-gray-100">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <input
+                          type="text"
+                          placeholder="Search teams..."
+                          value={teamSearchTerm}
+                          onChange={(e) => setTeamSearchTerm(e.target.value)}
+                          className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Teams List */}
+                    <div className="max-h-48 overflow-y-auto">
+                      {filteredTeams.length > 0 ? (
+                        filteredTeams.map((team) => (
+                          <button
+                            key={team._id}
+                            type="button"
+                            onClick={() => handleTeamSelect(team._id, team.name)}
+                            className={`w-full px-4 py-3 text-left hover:bg-green-50 active:bg-green-100 transition-all duration-150 flex items-center space-x-3 transform hover:scale-[1.01] ${
+                              form.teamId === team._id ? 'bg-green-100 text-green-800 shadow-sm' : 'text-gray-700'
+                            }`}
+                          >
+                            <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                              <Users className="w-4 h-4 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-sm">{team.name}</div>
+                              {team.description && (
+                                <div className="text-xs text-gray-500 truncate">{team.description}</div>
+                              )}
+                            </div>
+                            {form.teamId === team._id && (
+                              <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                            )}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="px-4 py-6 text-center text-gray-500">
+                          <div className="w-8 h-8 mx-auto mb-2 rounded-full bg-gray-100 flex items-center justify-center">
+                            <Search className="w-4 h-4 text-gray-400" />
+                          </div>
+                          <p className="text-sm font-medium">No teams found</p>
+                          {teamSearchTerm && (
+                            <p className="text-xs mt-1 text-gray-400">Try adjusting your search terms</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* No Teams Available Message */}
+                    {teams.length === 0 && (
+                      <div className="px-4 py-6 text-center text-gray-500 border-t border-gray-100">
+                        <div className="w-8 h-8 mx-auto mb-2 rounded-full bg-gray-100 flex items-center justify-center">
+                          <Users className="w-4 h-4 text-gray-400" />
+                        </div>
+                        <p className="text-sm font-medium">No teams available</p>
+                        <p className="text-xs mt-1 text-gray-400">You can join a team later from your dashboard</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              {/* Helper Text */}
+              {teams.length === 0 && !isTeamDropdownOpen && (
+                <p className="text-xs text-gray-500 mt-1">
+                  No teams available. You can join a team later from your dashboard.
+                </p>
+              )}
             </div>
 
             {/* Position Field */}
@@ -256,44 +440,6 @@ function Signup() {
                   className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm"
                 />
               </div>
-            </div>
-
-            {/* Team Selection Field */}
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700">
-                Select Team <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Users className="h-4 w-4 text-gray-400" />
-                </div>
-                <select
-                  name="teamId"
-                  value={form.teamId}
-                  onChange={handleChange}
-                  required
-                  className="w-full pl-9 pr-8 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white appearance-none text-sm"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                    backgroundPosition: 'right 0.5rem center',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundSize: '1.5em 1.5em',
-                    paddingRight: '2rem'
-                  }}
-                >
-                  <option value="">Choose a team</option>
-                  {teams.map((team) => (
-                    <option key={team._id} value={team._id}>
-                      {team.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {teams.length === 0 && (
-                <p className="text-xs text-gray-500 mt-1">
-                  No teams available. You can join a team later from your dashboard.
-                </p>
-              )}
             </div>
 
             {/* Submit Button */}

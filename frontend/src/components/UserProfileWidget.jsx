@@ -7,19 +7,25 @@ function UserProfileWidget() {
 
   if (!user) return null;
 
-  const avatarUrl = getAvatarUrl(user.profilePicture, user.name, 32);
-
   return (
     <div className="absolute right-4 top-4 z-50 flex items-center gap-2">
       <Link
         to="/profile"
         className="flex items-center space-x-2 hover:underline text-sm text-gray-700"
       >
-        <img
-          src={avatarUrl}
-          alt="Profile"
-          className="w-8 h-8 rounded-full object-cover border border-gray-300"
-        />
+        {user.profilePicture ? (
+          <img
+            src={user.profilePicture}
+            alt="Profile"
+            className="w-8 h-8 rounded-full object-cover border border-gray-300"
+          />
+        ) : (
+          <div className="w-8 h-8 rounded-full border border-gray-300 bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+            <span className="text-white text-xs font-bold">
+              {user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+            </span>
+          </div>
+        )}
         <span className="font-medium">{user.name}</span>
       </Link>
     </div>
