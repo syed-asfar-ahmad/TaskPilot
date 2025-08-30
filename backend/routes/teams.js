@@ -112,13 +112,52 @@ router.get('/managers', verifyToken, async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    // Get only managers who are not assigned to any team
+    // Get all teams to see which managers are already assigned
+    const allTeams = await Team.find().select('manager');
+    const assignedManagerIds = allTeams.map(team => team.manager.toString());
+
+    // Get managers who are not assigned to any team
+    // Check both: teamId field and if they're not in any team's manager field
     const managers = await User.find({ 
       role: 'Manager',
-      teamId: { $exists: false }
-    }).select('name email');
+      $and: [
+        {
+          $or: [
+            { teamId: { $exists: false } },
+            { teamId: null }
+          ]
+        },
+        {
+          _id: { $nin: assignedManagerIds }
+        }
+      ]
+    }).select('name email profilePicture');
 
     res.json(managers);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Fix manager teamId issue (Admin only - temporary)
+router.post('/fix-manager-teamid', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'Admin') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    // Find all managers and clear their teamId
+    const result = await User.updateMany(
+      { role: 'Manager' },
+      { $unset: { teamId: "" } }
+    );
+
+
+
+    res.json({ 
+      message: 'Manager teamId fixed', 
+      modifiedCount: result.modifiedCount 
+    });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }

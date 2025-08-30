@@ -220,9 +220,15 @@ router.put('/:userId/role', verifyToken, async (req, res) => {
       return res.status(400).json({ message: 'Managers can only be demoted to Team Member' });
     }
 
+    // If promoting to Manager, clear their teamId so they can be assigned to new teams
+    const updateData = { role: newRole };
+    if (newRole === 'Manager') {
+      updateData.teamId = null;
+    }
+
     const user = await User.findByIdAndUpdate(
       userId,
-      { role: newRole },
+      updateData,
       { new: true }
     );
 

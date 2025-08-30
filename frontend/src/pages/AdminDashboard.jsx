@@ -6,6 +6,7 @@ import Navbar from "../components/AuthNavbar";
 import Footer from "../components/Footer";
 import { toast } from 'react-hot-toast'; 
 import UserProfileWidget from "../components/UserProfileWidget";
+import Select from "react-select";
 
 import {
   BarChart,
@@ -236,6 +237,36 @@ function AdminDashboard() {
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to create team');
     }
+  };
+
+  const handleFixManagerTeamId = async () => {
+    try {
+      const response = await axios.post(`${API}/teams/fix-manager-teamid`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      toast.success(`Fixed ${response.data.modifiedCount} managers!`);
+      
+      // Refresh managers
+      const managersRes = await axios.get(`${API}/teams/managers`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setManagers(managersRes.data);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to fix managers');
+    }
+  };
+
+  // Format managers for React Select
+  const managerOptions = managers.map((manager) => ({
+    value: manager._id,
+    label: manager.name,
+    email: manager.email,
+    profilePicture: manager.profilePicture || null
+  }));
+
+  const handleManagerChange = (selectedOption) => {
+    setCreateTeamForm({ ...createTeamForm, managerId: selectedOption ? selectedOption.value : '' });
   };
 
   const handleAddMemberToTeam = async (teamId, memberId) => {
@@ -976,34 +1007,101 @@ function AdminDashboard() {
                         <label className="block text-sm font-semibold text-gray-700">
                           Assign Manager <span className="text-red-500">*</span>
                         </label>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <UserCheck size={18} className="text-gray-400" />
-                          </div>
-                          <select
-                            required
-                            value={createTeamForm.managerId}
-                            onChange={(e) => setCreateTeamForm({...createTeamForm, managerId: e.target.value})}
-                            className="w-full pl-12 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white appearance-none"
-                            style={{
-                              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                              backgroundPosition: 'right 1rem center',
-                              backgroundRepeat: 'no-repeat',
-                              backgroundSize: '1.5em 1.5em'
-                            }}
-                          >
-                            <option value="">Select manager</option>
-                            {managers.map((manager) => (
-                              <option key={manager._id} value={manager._id}>
-                                {manager.name} ({manager.email})
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                        <Select
+                          value={managerOptions.find(option => option.value === createTeamForm.managerId)}
+                          onChange={handleManagerChange}
+                          options={managerOptions}
+                          placeholder="Select manager..."
+                          className="react-select-container"
+                          classNamePrefix="react-select"
+                          menuPortalTarget={document.body}
+                          styles={{
+                            control: (base, state) => ({
+                              ...base,
+                              minHeight: '48px',
+                              border: state.isFocused ? '2px solid #16a34a' : '1px solid #d1d5db',
+                              borderRadius: '12px',
+                              boxShadow: state.isFocused ? '0 0 0 3px rgba(22, 163, 74, 0.1)' : 'none',
+                              cursor: 'pointer',
+                              backgroundColor: '#f9fafb',
+                              '&:hover': {
+                                border: '2px solid #16a34a'
+                              }
+                            }),
+                            option: (base, state) => ({
+                              ...base,
+                              backgroundColor: state.isSelected 
+                                ? '#16a34a' 
+                                : state.isFocused 
+                                ? '#f0fdf4' 
+                                : 'white',
+                              color: state.isSelected ? 'white' : '#374151',
+                              padding: '12px 16px',
+                              cursor: 'pointer',
+                              '&:hover': {
+                                backgroundColor: state.isSelected ? '#16a34a' : '#f0fdf4'
+                              }
+                            }),
+                            menu: (base) => ({
+                              ...base,
+                              borderRadius: '12px',
+                              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                              border: '1px solid #e5e7eb'
+                            }),
+                            menuPortal: (base) => ({
+                              ...base,
+                              zIndex: 9999
+                            }),
+                            singleValue: (base) => ({
+                              ...base,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px'
+                            }),
+                            placeholder: (base) => ({
+                              ...base,
+                              color: '#9ca3af',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px'
+                            })
+                          }}
+                          formatOptionLabel={(option) => (
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center text-white font-medium text-sm">
+                                {option.profilePicture ? (
+                                  <img 
+                                    src={option.profilePicture} 
+                                    alt={option.label}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  option.label.charAt(0).toUpperCase()
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium text-gray-900 truncate">{option.label}</div>
+                                <div className="text-sm text-gray-500 truncate">{option.email}</div>
+                              </div>
+                            </div>
+                          )}
+                        />
                         <div className="flex items-center gap-2 text-xs text-gray-500 bg-blue-50 p-3 rounded-lg border border-blue-100">
                           <Info size={14} className="text-blue-500 flex-shrink-0" />
-                          <span>Only available managers are shown. Assigned managers will not appear in this list.</span>
+                          <span>Only available managers are shown. Assigned managers will not appear in this list. ({managers.length} available)</span>
                         </div>
+                        {managers.length === 0 && (
+                          <div className="flex items-center gap-2 text-xs text-orange-600 bg-orange-50 p-3 rounded-lg border border-orange-100">
+                            <Info size={14} className="text-orange-500 flex-shrink-0" />
+                            <span>No managers found. Click the button below to fix manager assignments.</span>
+                            <button
+                              onClick={handleFixManagerTeamId}
+                              className="ml-2 px-3 py-1 bg-orange-500 text-white rounded text-xs hover:bg-orange-600 transition-colors"
+                            >
+                              Fix Managers
+                            </button>
+                          </div>
+                        )}
                       </div>
                       
                       {/* Action Buttons */}
