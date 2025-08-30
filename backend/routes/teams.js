@@ -139,29 +139,7 @@ router.get('/managers', verifyToken, async (req, res) => {
   }
 });
 
-// Fix manager teamId issue (Admin only - temporary)
-router.post('/fix-manager-teamid', verifyToken, async (req, res) => {
-  try {
-    if (req.user.role !== 'Admin') {
-      return res.status(403).json({ message: 'Access denied' });
-    }
 
-    // Find all managers and clear their teamId
-    const result = await User.updateMany(
-      { role: 'Manager' },
-      { $unset: { teamId: "" } }
-    );
-
-
-
-    res.json({ 
-      message: 'Manager teamId fixed', 
-      modifiedCount: result.modifiedCount 
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
-});
 
 // Get teams for signup form (Public route - no auth required)
 router.get('/signup-teams', async (req, res) => {

@@ -239,23 +239,7 @@ function AdminDashboard() {
     }
   };
 
-  const handleFixManagerTeamId = async () => {
-    try {
-      const response = await axios.post(`${API}/teams/fix-manager-teamid`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      
-      toast.success(`Fixed ${response.data.modifiedCount} managers!`);
-      
-      // Refresh managers
-      const managersRes = await axios.get(`${API}/teams/managers`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setManagers(managersRes.data);
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to fix managers');
-    }
-  };
+
 
   // Format managers for React Select
   const managerOptions = managers.map((manager) => ({
@@ -1024,6 +1008,7 @@ function AdminDashboard() {
                               boxShadow: state.isFocused ? '0 0 0 3px rgba(22, 163, 74, 0.1)' : 'none',
                               cursor: 'pointer',
                               backgroundColor: '#f9fafb',
+                              fontSize: '14px',
                               '&:hover': {
                                 border: '2px solid #16a34a'
                               }
@@ -1038,6 +1023,7 @@ function AdminDashboard() {
                               color: state.isSelected ? 'white' : '#374151',
                               padding: '12px 16px',
                               cursor: 'pointer',
+                              fontSize: '14px',
                               '&:hover': {
                                 backgroundColor: state.isSelected ? '#16a34a' : '#f0fdf4'
                               }
@@ -1086,22 +1072,7 @@ function AdminDashboard() {
                             </div>
                           )}
                         />
-                        <div className="flex items-center gap-2 text-xs text-gray-500 bg-blue-50 p-3 rounded-lg border border-blue-100">
-                          <Info size={14} className="text-blue-500 flex-shrink-0" />
-                          <span>Only available managers are shown. Assigned managers will not appear in this list. ({managers.length} available)</span>
-                        </div>
-                        {managers.length === 0 && (
-                          <div className="flex items-center gap-2 text-xs text-orange-600 bg-orange-50 p-3 rounded-lg border border-orange-100">
-                            <Info size={14} className="text-orange-500 flex-shrink-0" />
-                            <span>No managers found. Click the button below to fix manager assignments.</span>
-                            <button
-                              onClick={handleFixManagerTeamId}
-                              className="ml-2 px-3 py-1 bg-orange-500 text-white rounded text-xs hover:bg-orange-600 transition-colors"
-                            >
-                              Fix Managers
-                            </button>
-                          </div>
-                        )}
+
                       </div>
                       
                       {/* Action Buttons */}
