@@ -759,30 +759,32 @@ function ProjectDetailPage() {
                 Project Attachments ({project.attachments?.length || 0})
               </h2>
               
-              {/* File Upload */}
-             <div className="mb-4">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  onChange={(e) => setFile(e.target.files[0])}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
-                />
-                {file && (
-                  <div className="p-3 bg-green-50 rounded-lg border border-green-200 mt-2">
-                    <p className="text-sm text-green-700">Selected: {file.name}</p>
-                  </div>
-                )}
-                <button
-                  onClick={handleFileUpload}
-                  className={`bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors mt-3 ${
-                    uploading ? 'opacity-70 cursor-not-allowed' : ''
-                  }`}
-                  disabled={uploading}
-                >
-                  <UploadCloud size={18} />
-                  {uploading ? 'Uploading...' : 'Upload File'}
-                </button>
-              </div>
+              {/* File Upload - Hidden for Admin */}
+              {user?.role !== 'Admin' && (
+                <div className="mb-4">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    onChange={(e) => setFile(e.target.files[0])}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                  />
+                  {file && (
+                    <div className="p-3 bg-green-50 rounded-lg border border-green-200 mt-2">
+                      <p className="text-sm text-green-700">Selected: {file.name}</p>
+                    </div>
+                  )}
+                  <button
+                    onClick={handleFileUpload}
+                    className={`bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors mt-3 ${
+                      uploading ? 'opacity-70 cursor-not-allowed' : ''
+                    }`}
+                    disabled={uploading}
+                  >
+                    <UploadCloud size={18} />
+                    {uploading ? 'Uploading...' : 'Upload File'}
+                  </button>
+                </div>
+              )}
 
               {/* Attachments List */}
               {!project.attachments || project.attachments.length === 0 ? (
@@ -884,24 +886,26 @@ function ProjectDetailPage() {
                 </div>
               )}
 
-              {/* Comment Form */}
-              <form onSubmit={handleCommentSubmit} className="flex items-center gap-3">
-                <input
-                  type="text"
-                  placeholder="Write a comment..."
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  disabled={isCommentSubmitting}
-                  className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100"
-                />
-                <button
-                  type="submit"
-                  disabled={isCommentSubmitting || !commentText.trim()}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg flex items-center gap-2 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                >
-                  <Send size={16} /> {isCommentSubmitting ? 'Posting...' : 'Post'}
-                </button>
-              </form>
+              {/* Comment Form - Hidden for Admin */}
+              {user?.role !== 'Admin' && (
+                <form onSubmit={handleCommentSubmit} className="flex items-center gap-3">
+                  <input
+                    type="text"
+                    placeholder="Write a comment..."
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    disabled={isCommentSubmitting}
+                    className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isCommentSubmitting || !commentText.trim()}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg flex items-center gap-2 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  >
+                    <Send size={16} /> {isCommentSubmitting ? 'Posting...' : 'Post'}
+                  </button>
+                </form>
+              )}
             </div>
           </div>
       </main>

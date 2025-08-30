@@ -314,8 +314,14 @@ router.put('/:id', verifyToken, updateTask);
 // Delete Task - Manager only (if assigned to project)
 router.delete('/:id', verifyToken, checkRole('Manager'), checkManagerTaskAccess, deleteTask);
 
-// Add Comment to Task - Any logged-in user
-router.post('/:id/comments', verifyToken, addCommentToTask);
+// Add Comment to Task - Any logged-in user (except Admin)
+router.post('/:id/comments', verifyToken, (req, res, next) => {
+  // Check if user is admin - restrict admin from commenting
+  if (req.user.role === 'Admin') {
+    return res.status(403).json({ error: 'Admin role cannot add comments to tasks' });
+  }
+  next();
+}, addCommentToTask);
 
 // Delete comment from task (Manager only)
 router.delete('/:taskId/comments/:commentId', verifyToken, checkRole('Manager'), checkManagerTaskAccess, async (req, res) => {
@@ -352,11 +358,16 @@ router.delete('/:taskId/comments/:commentId', verifyToken, checkRole('Manager'),
   }
 });
 
-// Upload File to Task - Any logged-in user
+// Upload File to Task - Any logged-in user (except Admin)
 router.post('/:id/upload', verifyToken, memoryUpload.single('file'), async (req, res) => {
   const Task = require('../models/Task');
 
   try {
+    // Check if user is admin - restrict admin from uploading files
+    if (req.user.role === 'Admin') {
+      return res.status(403).json({ error: 'Admin role cannot upload files to tasks' });
+    }
+
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }

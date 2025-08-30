@@ -34,12 +34,46 @@ router.get('/managers', verifyToken, async (req, res) => {
 // GET manager's team members (for managers creating projects)
 router.get('/my-team-members', verifyToken, async (req, res) => {
   try {
-    // Find users whose teamId matches any team managed by this manager
-    const teams = await require('../models/Team').find({ manager: req.user.id });
-    const teamIds = teams.map(team => team._id);
-    const teamMembers = await User.find({ teamId: { $in: teamIds } }).select('_id name email profilePicture');
-    res.json(teamMembers);
+    if (req.user.role !== 'Manager') {
+      return res.status(403).json({ error: 'Access denied: Managers only' });
+    }
+
+    // First, find the team where this manager is assigned
+    const manager = await User.findById(req.user.id).populate('teamId');
+    console.log('Manager data:', { id: manager._id, teamId: manager.teamId, role: manager.role });
+    
+    if (!manager.teamId) {
+      // If manager is not assigned to a team via teamId, try to find team where they are the manager
+      const Team = require('../models/Team');
+      const team = await Team.findOne({ manager: manager._id });
+      
+      if (!team) {
+        console.log('No team found for manager:', manager._id);
+        return res.status(404).json({ error: 'Manager not assigned to any team' });
+      }
+      
+      // Find all users who belong to this team (either via teamId or as team members)
+      const teamMembers = await User.find({
+        $or: [
+          { teamId: team._id, role: 'Team Member' },
+          { _id: { $in: team.members }, role: 'Team Member' }
+        ]
+      }).select('_id name email profilePicture role bio dateOfBirth position gender');
+      
+      console.log('Found team members via team.members:', teamMembers.length);
+      res.json(teamMembers);
+    } else {
+      // Manager has teamId assigned
+      const teamMembers = await User.find({ 
+        teamId: manager.teamId._id,
+        role: 'Team Member'
+      }).select('_id name email profilePicture role bio dateOfBirth position gender');
+      
+      console.log('Found team members via teamId:', teamMembers.length);
+      res.json(teamMembers);
+    }
   } catch (err) {
+    console.error('Error fetching manager team members:', err);
     res.status(500).json({ error: 'Failed to fetch manager team members' });
   }
 });
@@ -53,17 +87,82 @@ router.get('/my-team-managers', verifyToken, async (req, res) => {
 
     const manager = await User.findById(req.user.id).populate('teamId');
     if (!manager.teamId) {
-      return res.status(404).json({ error: 'Manager not assigned to any team' });
-    }
+      // Try to find team where they are the manager
+      const Team = require('../models/Team');
+      const team = await Team.findOne({ manager: manager._id });
+      
+      if (!team) {
+        return res.status(404).json({ error: 'Manager not assigned to any team' });
+      }
 
-    const teamManagers = await User.find({ 
-      teamId: manager.teamId._id,
-      role: 'Manager'
-    }).select('_id name email');
-    
-    res.json(teamManagers);
+      const teamManagers = await User.find({ 
+        $or: [
+          { teamId: team._id, role: 'Manager' },
+          { _id: { $in: team.members }, role: 'Manager' }
+        ]
+      }).select('_id name email');
+      
+      res.json(teamManagers);
+    } else {
+      const teamManagers = await User.find({ 
+        teamId: manager.teamId._id,
+        role: 'Manager'
+      }).select('_id name email');
+      
+      res.json(teamManagers);
+    }
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch team managers' });
+  }
+});
+
+// Setup team assignments (Admin only - temporary)
+router.post('/setup-team-assignments', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'Admin') {
+      return res.status(403).json({ error: 'Access denied: Admin only' });
+    }
+
+    const Team = require('../models/Team');
+    
+    // Get all teams
+    const teams = await Team.find().populate('manager', 'name email').populate('members', 'name email role');
+    
+    // Get all team members
+    const teamMembers = await User.find({ role: 'Team Member' });
+    
+    // Get all managers
+    const managers = await User.find({ role: 'Manager' });
+    
+    const results = [];
+    
+    // For each team, assign team members to that team
+    for (const team of teams) {
+      // Assign team members to this team
+      const updatedMembers = await User.updateMany(
+        { role: 'Team Member' },
+        { teamId: team._id }
+      );
+      
+      // Assign manager to this team
+      if (team.manager) {
+        await User.findByIdAndUpdate(team.manager._id, { teamId: team._id });
+      }
+      
+      results.push({
+        team: team.name,
+        manager: team.manager?.name || 'No manager',
+        membersAssigned: updatedMembers.modifiedCount
+      });
+    }
+    
+    res.json({
+      message: 'Team assignments setup completed',
+      results
+    });
+  } catch (err) {
+    console.error('Setup team assignments error:', err);
+    res.status(500).json({ error: 'Failed to setup team assignments' });
   }
 });
 

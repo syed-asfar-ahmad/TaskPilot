@@ -89,6 +89,11 @@ router.put('/:id', verifyToken, checkRole('Manager'), checkManagerProjectAccess,
 // Add Comment to a Project
 router.post('/:id/comments', verifyToken, async (req, res) => {
   try {
+    // Check if user is admin - restrict admin from commenting
+    if (req.user.role === 'Admin') {
+      return res.status(403).json({ error: 'Admin role cannot add comments to projects' });
+    }
+
     // Get user details for notifications
     const User = require('../models/User');
     const user = await User.findById(req.user.id);
@@ -402,9 +407,14 @@ router.delete('/:id/attachments/:attachmentId', verifyToken, checkRole('Manager'
   }
 });
 
-// Upload File to Project - Any logged-in user
+// Upload File to Project - Any logged-in user (except Admin)
 router.post('/:id/upload', verifyToken, memoryUpload.single('file'), async (req, res) => {
   try {
+    // Check if user is admin - restrict admin from uploading files
+    if (req.user.role === 'Admin') {
+      return res.status(403).json({ error: 'Admin role cannot upload files to projects' });
+    }
+
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
