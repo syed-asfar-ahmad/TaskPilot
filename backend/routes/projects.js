@@ -93,8 +93,8 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
-// CREATE new project — Manager only
-router.post('/', verifyToken, checkRole('Manager'), createProject);
+// CREATE new project — Admin and Manager only
+router.post('/', verifyToken, checkRole('Admin', 'Manager'), createProject);
 
 // UPDATE project — Manager only (if assigned to project)
 router.put('/:id', verifyToken, checkRole('Manager'), checkManagerProjectAccess, updateProject);

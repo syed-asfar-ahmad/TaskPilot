@@ -16,9 +16,22 @@ const createProject = async (req, res) => {
 
     // If user is a Manager, validate that they can only create projects within their team
     if (req.user.role === 'Manager') {
+      const Team = require('../models/Team');
       const manager = await User.findById(req.user.id).populate('teamId');
       
-      if (!manager.teamId) {
+      let managerTeamId = null;
+      
+      if (manager.teamId) {
+        managerTeamId = manager.teamId._id;
+      } else {
+        // If teamId not set, find team where this manager is the manager
+        const team = await Team.findOne({ manager: manager._id });
+        if (team) {
+          managerTeamId = team._id;
+        }
+      }
+      
+      if (!managerTeamId) {
         return res.status(403).json({ error: 'Manager not assigned to any team' });
       }
 
@@ -26,7 +39,7 @@ const createProject = async (req, res) => {
       if (teamMembers && teamMembers.length > 0) {
         const membersInTeam = await User.find({ 
           _id: { $in: teamMembers }, 
-          teamId: manager.teamId._id 
+          teamId: managerTeamId 
         });
         
         if (membersInTeam.length !== teamMembers.length) {
