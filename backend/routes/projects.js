@@ -134,13 +134,19 @@ router.post('/:id/comments', verifyToken, async (req, res) => {
       .populate('teamMembers', 'name email profilePicture')
       .populate('projectManager', 'name email profilePicture');
 
-    // Get the last comment (the one we just added)
+    // Get the last comment (the one we just added) and populate the author
     const lastComment = populatedProject.comments[populatedProject.comments.length - 1];
+    
+    // Populate the author field for the returned comment
+    const populatedComment = await require('../models/Project').findById(req.params.id)
+      .select('comments')
+      .populate('comments.author', 'name email')
+      .then(project => project.comments[project.comments.length - 1]);
 
     // Send notification for new comment
     await NotificationService.notifyCommentAdded(lastComment, user, populatedProject);
 
-    res.status(200).json(lastComment);
+    res.status(200).json(populatedComment);
   } catch (error) {
     res.status(500).json({ error: 'Failed to add comment' });
   }
