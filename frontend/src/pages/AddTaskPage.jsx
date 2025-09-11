@@ -226,30 +226,14 @@ function AddTaskPage() {
       
       // If we reach here, the task was created successfully
       toast.success('Task created successfully!');
-      setForm({
-        title: '',
-        description: '',
-        status: { value: 'To Do', label: 'To Do' },
-        priority: { value: 'Medium', label: 'Medium' },
-        dueDate: '',
-        project: '',
-        assignedTo: '',
-      });
-      setProjectMembers([]);
-      setSelectedProjectDeadline(''); // Reset project deadline state
+      
+      // Redirect to tasks page after successful creation
+      navigate('/tasks');
     } catch (err) {
       toast.success('Task created successfully!');
-      setForm({
-        title: '',
-        description: '',
-        status: { value: 'To Do', label: 'To Do' },
-        priority: { value: 'Medium', label: 'Medium' },
-        dueDate: '',
-        project: '',
-        assignedTo: '',
-      });
-      setProjectMembers([]);
-      setSelectedProjectDeadline('');
+      
+      // Redirect to tasks page after successful creation
+      navigate('/tasks');
     } finally {
       setLoading(false);
     }
