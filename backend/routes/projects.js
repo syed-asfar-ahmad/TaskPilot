@@ -44,8 +44,8 @@ router.get('/', verifyToken, async (req, res) => {
 
     if (req.user.role === 'Team Member') {
       projects = await Project.find({ teamMembers: req.user.id })
-        .populate('teamMembers', 'name email')
-        .populate('projectManager', 'name email');
+        .populate('teamMembers', 'name email profilePicture')
+        .populate('projectManager', 'name email profilePicture');
     } else if (req.user.role === 'Manager') {
       // Get manager's team first
       const User = require('../models/User');
@@ -79,12 +79,12 @@ router.get('/', verifyToken, async (req, res) => {
           { teamMembers: { $in: teamMemberIds } } // Projects where team members are assigned
         ]
       })
-        .populate('teamMembers', 'name email')
-        .populate('projectManager', 'name email');
+        .populate('teamMembers', 'name email profilePicture')
+        .populate('projectManager', 'name email profilePicture');
     } else {
       projects = await Project.find()
-        .populate('teamMembers', 'name email')
-        .populate('projectManager', 'name email');
+        .populate('teamMembers', 'name email profilePicture')
+        .populate('projectManager', 'name email profilePicture');
     }
 
     res.json(projects);
@@ -131,8 +131,8 @@ router.post('/:id/comments', verifyToken, async (req, res) => {
 
     // Populate the project for notifications
     const populatedProject = await require('../models/Project').findById(req.params.id)
-      .populate('teamMembers', 'name email')
-      .populate('projectManager', 'name email');
+      .populate('teamMembers', 'name email profilePicture')
+      .populate('projectManager', 'name email profilePicture');
 
     // Get the last comment (the one we just added)
     const lastComment = populatedProject.comments[populatedProject.comments.length - 1];
@@ -162,8 +162,8 @@ router.delete('/:projectId/comments/:commentId', verifyToken, checkRole('Manager
     }
 
     const project = await require('../models/Project').findById(req.params.projectId)
-      .populate('teamMembers', 'name email')
-      .populate('projectManager', 'name email');
+      .populate('teamMembers', 'name email profilePicture')
+      .populate('projectManager', 'name email profilePicture');
     
     if (!project) {
       return res.status(404).json({ error: 'Project not found' });
@@ -197,12 +197,12 @@ router.get('/my-projects', verifyToken, async (req, res) => {
           { projectManager: userId }
         ]
       })
-        .populate('teamMembers', 'name email')
-        .populate('projectManager', 'name email');
+        .populate('teamMembers', 'name email profilePicture')
+        .populate('projectManager', 'name email profilePicture');
     } else {
       projects = await Project.find({ teamMembers: userId })
-        .populate('teamMembers', 'name email')
-        .populate('projectManager', 'name email');
+        .populate('teamMembers', 'name email profilePicture')
+        .populate('projectManager', 'name email profilePicture');
     }
     
     res.json(projects);
@@ -216,8 +216,8 @@ router.get('/:projectId/team-members', getProjectTeamMembers);
 router.get('/:id', verifyToken, async (req, res) => {
   try {
     const project = await Project.findById(req.params.id)
-      .populate('teamMembers', 'name email')
-      .populate('projectManager', 'name email');
+      .populate('teamMembers', 'name email profilePicture')
+      .populate('projectManager', 'name email profilePicture');
     if (!project) return res.status(404).json({ error: 'Project not found' });
     res.json(project);
   } catch (err) {
@@ -399,8 +399,8 @@ router.delete('/:id/attachments/:attachmentId', verifyToken, checkRole('Manager'
     }
 
     const project = await Project.findById(id)
-      .populate('teamMembers', 'name email')
-      .populate('projectManager', 'name email');
+      .populate('teamMembers', 'name email profilePicture')
+      .populate('projectManager', 'name email profilePicture');
     
     if (!project) return res.status(404).json({ error: 'Project not found' });
 
@@ -440,8 +440,8 @@ router.post('/:id/upload', verifyToken, memoryUpload.single('file'), async (req,
     }
 
     const project = await Project.findById(req.params.id)
-      .populate('teamMembers', 'name email')
-      .populate('projectManager', 'name email');
+      .populate('teamMembers', 'name email profilePicture')
+      .populate('projectManager', 'name email profilePicture');
     
     if (!project) return res.status(404).json({ error: 'Project not found' });
 

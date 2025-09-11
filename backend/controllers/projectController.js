@@ -37,9 +37,15 @@ const createProject = async (req, res) => {
 
       // Validate teamMembers: ensure all selected team members belong to the manager's team
       if (teamMembers && teamMembers.length > 0) {
+        // Get the team object to check both teamId and team.members
+        const team = await Team.findById(managerTeamId);
+        
         const membersInTeam = await User.find({ 
           _id: { $in: teamMembers }, 
-          teamId: managerTeamId 
+          $or: [
+            { teamId: managerTeamId, role: 'Team Member' },
+            { _id: { $in: team.members }, role: 'Team Member' }
+          ]
         });
         
         if (membersInTeam.length !== teamMembers.length) {

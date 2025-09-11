@@ -40,7 +40,6 @@ router.get('/my-team-members', verifyToken, async (req, res) => {
 
     // First, find the team where this manager is assigned
     const manager = await User.findById(req.user.id).populate('teamId');
-    console.log('Manager data:', { id: manager._id, teamId: manager.teamId, role: manager.role });
     
     if (!manager.teamId) {
       // If manager is not assigned to a team via teamId, try to find team where they are the manager
@@ -48,7 +47,6 @@ router.get('/my-team-members', verifyToken, async (req, res) => {
       const team = await Team.findOne({ manager: manager._id });
       
       if (!team) {
-        console.log('No team found for manager:', manager._id);
         return res.status(404).json({ error: 'Manager not assigned to any team' });
       }
       
@@ -60,7 +58,6 @@ router.get('/my-team-members', verifyToken, async (req, res) => {
         ]
       }).select('_id name email profilePicture role bio dateOfBirth position gender');
       
-      console.log('Found team members via team.members:', teamMembers.length);
       res.json(teamMembers);
     } else {
       // Manager has teamId assigned
@@ -69,11 +66,9 @@ router.get('/my-team-members', verifyToken, async (req, res) => {
         role: 'Team Member'
       }).select('_id name email profilePicture role bio dateOfBirth position gender');
       
-      console.log('Found team members via teamId:', teamMembers.length);
       res.json(teamMembers);
     }
   } catch (err) {
-    console.error('Error fetching manager team members:', err);
     res.status(500).json({ error: 'Failed to fetch manager team members' });
   }
 });
