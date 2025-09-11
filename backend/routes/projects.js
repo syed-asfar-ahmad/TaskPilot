@@ -49,14 +49,27 @@ router.get('/', verifyToken, async (req, res) => {
     } else if (req.user.role === 'Manager') {
       // Get manager's team first
       const User = require('../models/User');
+      const Team = require('../models/Team');
       const manager = await User.findById(req.user.id).populate('teamId');
       
-      if (!manager.teamId) {
+      let teamId = null;
+      
+      if (manager.teamId) {
+        teamId = manager.teamId._id;
+      } else {
+        // If teamId not set, find team where this manager is the manager
+        const team = await Team.findOne({ manager: manager._id });
+        if (team) {
+          teamId = team._id;
+        }
+      }
+      
+      if (!teamId) {
         return res.status(403).json({ error: 'Manager not assigned to any team' });
       }
 
       // Get all team members of this manager's team
-      const teamMembers = await User.find({ teamId: manager.teamId._id }).select('_id');
+      const teamMembers = await User.find({ teamId: teamId }).select('_id');
       const teamMemberIds = teamMembers.map(member => member._id);
 
       // Find projects where THIS manager is project manager OR any of their team members are assigned
