@@ -535,7 +535,13 @@ function AdminDashboard() {
                        <p className="text-xs text-gray-600">Organized teams</p>
                      </div>
                      <button
-                       onClick={() => setShowCreateTeamModal(true)}
+                       onClick={() => {
+                         // Scroll to teams section instead of opening create modal
+                         const teamsSection = document.getElementById('teams-section');
+                         if (teamsSection) {
+                           teamsSection.scrollIntoView({ behavior: 'smooth' });
+                         }
+                       }}
                        className="mt-3 inline-flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-3 py-1.5 rounded-lg hover:from-indigo-600 hover:to-indigo-700 transition-all duration-200 font-medium text-xs shadow-lg hover:shadow-xl w-full justify-center group-hover:scale-105"
                      >
                        <Users size={14} />
@@ -786,7 +792,7 @@ function AdminDashboard() {
             </section>
 
             {/* Team Management Section */}
-            <section className="mb-6">
+            <section id="teams-section" className="mb-6">
               <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-2">
                   <div className="bg-white p-1.5 rounded-full shadow-lg border border-green-100">
