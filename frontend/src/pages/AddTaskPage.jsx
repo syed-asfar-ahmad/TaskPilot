@@ -29,6 +29,7 @@ function AddTaskPage() {
     assignedTo: '',
   });
   const [selectedProjectDeadline, setSelectedProjectDeadline] = useState('');
+  const [errors, setErrors] = useState({});
 
   // Status options with icons and colors
   const statusOptions = [
@@ -117,6 +118,11 @@ function AddTaskPage() {
   const handleDateSelect = (date) => {
     setForm(prev => ({ ...prev, dueDate: formatDate(date) }));
     setShowCalendar(false);
+    
+    // Clear due date error when user selects date
+    if (errors.dueDate) {
+      setErrors((prev) => ({ ...prev, dueDate: null }));
+    }
   };
 
   const goToPreviousMonth = () => {
@@ -212,12 +218,47 @@ function AddTaskPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Clear previous errors
+    setErrors({});
+    
+    // Validate required fields
+    const newErrors = {};
+    
+    if (!form.title.trim()) {
+      newErrors.title = "Task title is required";
+    }
+    
+    if (!form.description.trim()) {
+      newErrors.description = "Task description is required";
+    }
+    
+    if (!form.project) {
+      newErrors.project = "Project selection is required";
+    }
+    
+    if (!form.assignedTo) {
+      newErrors.assignedTo = "Task assignment is required";
+    }
+    
+    if (!form.dueDate) {
+      newErrors.dueDate = "Due date is required";
+    }
+    
+    // If there are validation errors, set them and return
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error("Please fill in all required fields");
+      return;
+    }
+    
     setLoading(true);
     try {
       const taskData = {
         ...form,
         status: form.status.value,
-        priority: form.priority.value
+        priority: form.priority.value,
+        assignedTo: form.assignedTo ? [form.assignedTo] : []
       };
       
       await axios.post(`${API}/tasks`, taskData, {
@@ -230,10 +271,14 @@ function AddTaskPage() {
       // Redirect to tasks page after successful creation
       navigate('/tasks');
     } catch (err) {
-      toast.success('Task created successfully!');
-      
-      // Redirect to tasks page after successful creation
-      navigate('/tasks');
+      console.error('Task creation error:', err);
+      if (err.response?.status === 201) {
+        // Task was created successfully despite error
+        toast.success('Task created successfully!');
+        navigate('/tasks');
+      } else {
+        toast.error(`Failed to create task: ${err.response?.data?.error || err.message}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -318,10 +363,21 @@ function AddTaskPage() {
                   name="title"
                     placeholder="Enter task title"
                   value={form.title}
-                    onChange={(e) => setForm(prev => ({ ...prev, title: e.target.value }))}
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-200"
+                    onChange={(e) => {
+                      setForm(prev => ({ ...prev, title: e.target.value }));
+                      // Clear error when user starts typing
+                      if (errors.title) {
+                        setErrors((prev) => ({ ...prev, title: null }));
+                      }
+                    }}
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-200 ${
+                      errors.title ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+                    }`}
                   required
                 />
+                {errors.title && (
+                  <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+                )}
               </div>
 
               {/* Description */}
@@ -334,11 +390,22 @@ function AddTaskPage() {
                   name="description"
                     placeholder="Brief task description"
                   value={form.description}
-                    onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-200"
+                    onChange={(e) => {
+                      setForm(prev => ({ ...prev, description: e.target.value }));
+                      // Clear error when user starts typing
+                      if (errors.description) {
+                        setErrors((prev) => ({ ...prev, description: null }));
+                      }
+                    }}
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-200 ${
+                      errors.description ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+                    }`}
                     rows={4}
                   required
                   />
+                {errors.description && (
+                  <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+                )}
               </div>
 
               {/* Project */}
@@ -356,6 +423,10 @@ function AddTaskPage() {
                         assignedTo: '', // Reset assignedTo when project changes
                         dueDate: '' // Reset dueDate when project changes
                       }));
+                      // Clear project error when user selects
+                      if (errors.project) {
+                        setErrors((prev) => ({ ...prev, project: null }));
+                      }
                     }}
                     options={projects.map((project) => ({
                       value: project._id,
@@ -369,12 +440,20 @@ function AddTaskPage() {
                       control: (base, state) => ({
                         ...base,
                         minHeight: '42px',
-                        border: state.isFocused ? '2px solid #16a34a' : '1px solid #d1d5db',
+                        border: state.isFocused 
+                          ? '2px solid #16a34a' 
+                          : errors.project 
+                          ? '2px solid #dc2626' 
+                          : '1px solid #d1d5db',
                         borderRadius: '8px',
                         boxShadow: state.isFocused ? '0 0 0 3px rgba(22, 163, 74, 0.1)' : 'none',
                         cursor: 'pointer',
                         '&:hover': {
-                          border: '2px solid #16a34a'
+                          border: state.isFocused 
+                            ? '2px solid #16a34a' 
+                            : errors.project 
+                            ? '2px solid #dc2626' 
+                            : '2px solid #16a34a'
                         }
                       }),
                       option: (base, state) => ({
@@ -427,6 +506,9 @@ function AddTaskPage() {
                       </div>
                     )}
                   />
+                  {errors.project && (
+                    <p className="text-red-500 text-sm mt-1">{errors.project}</p>
+                  )}
               </div>
 
               {/* Assigned To */}
@@ -448,6 +530,10 @@ function AddTaskPage() {
                         ...prev,
                         assignedTo: selectedOption ? selectedOption.value : ''
                       }));
+                      // Clear assignedTo error when user selects
+                      if (errors.assignedTo) {
+                        setErrors((prev) => ({ ...prev, assignedTo: null }));
+                      }
                     }}
                     options={projectMembers.map((u) => ({
                       value: u._id,
@@ -464,12 +550,20 @@ function AddTaskPage() {
                       control: (base, state) => ({
                         ...base,
                         minHeight: '42px',
-                        border: state.isFocused ? '2px solid #16a34a' : '1px solid #d1d5db',
+                        border: state.isFocused 
+                          ? '2px solid #16a34a' 
+                          : errors.assignedTo 
+                          ? '2px solid #dc2626' 
+                          : '1px solid #d1d5db',
                         borderRadius: '8px',
                         boxShadow: state.isFocused ? '0 0 0 3px rgba(22, 163, 74, 0.1)' : 'none',
                         cursor: 'pointer',
                         '&:hover': {
-                          border: '2px solid #16a34a'
+                          border: state.isFocused 
+                            ? '2px solid #16a34a' 
+                            : errors.assignedTo 
+                            ? '2px solid #dc2626' 
+                            : '2px solid #16a34a'
                         }
                       }),
                       option: (base, state) => ({
@@ -555,6 +649,9 @@ function AddTaskPage() {
                       </div>
                     )}
                   />
+                  {errors.assignedTo && (
+                    <p className="text-red-500 text-sm mt-1">{errors.assignedTo}</p>
+                  )}
               </div>
 
               {/* Status */}
@@ -769,7 +866,9 @@ function AddTaskPage() {
                       placeholder="Select due date"
                       readOnly
                       onClick={() => setShowCalendar(!showCalendar)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white hover:bg-gray-50 cursor-pointer"
+                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white hover:bg-gray-50 cursor-pointer ${
+                        errors.dueDate ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
+                      }`}
                     />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                       <CalendarDays className="w-5 h-5 text-gray-400" />
@@ -881,7 +980,10 @@ function AddTaskPage() {
                     />
                   )}
                   
-                  {form.dueDate && (
+                  {errors.dueDate && (
+                    <p className="text-red-500 text-sm mt-1">{errors.dueDate}</p>
+                  )}
+                  {form.dueDate && !errors.dueDate && (
                     <div className="mt-2 flex items-center space-x-2 text-sm text-gray-600">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                       <span>Due date set for: {new Date(form.dueDate).toLocaleDateString('en-US', { 

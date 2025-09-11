@@ -24,6 +24,8 @@ function AddProjectForm({ onProjectCreated }) {
     teamMembers: [],
   });
 
+  const [errors, setErrors] = useState({});
+
   // Status options with icons and colors
   const statusOptions = [
     {
@@ -98,6 +100,11 @@ function AddProjectForm({ onProjectCreated }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: null }));
+    }
   };
 
   const handleStatusChange = (selectedOption) => {
@@ -107,6 +114,11 @@ function AddProjectForm({ onProjectCreated }) {
   const handleTeamChange = (selectedOptions) => {
     const selectedIds = selectedOptions.map((opt) => opt.value);
     setForm((prev) => ({ ...prev, teamMembers: selectedIds }));
+    
+    // Clear team members error when user selects
+    if (errors.teamMembers) {
+      setErrors((prev) => ({ ...prev, teamMembers: null }));
+    }
   };
 
   // Custom Calendar Functions
@@ -140,6 +152,11 @@ function AddProjectForm({ onProjectCreated }) {
   const handleDateSelect = (date) => {
     setForm(prev => ({ ...prev, deadline: formatDate(date) }));
     setShowCalendar(false);
+    
+    // Clear deadline error when user selects date
+    if (errors.deadline) {
+      setErrors((prev) => ({ ...prev, deadline: null }));
+    }
   };
 
   const goToPreviousMonth = () => {
@@ -167,6 +184,36 @@ function AddProjectForm({ onProjectCreated }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Clear previous errors
+    setErrors({});
+    
+    // Validate required fields
+    const newErrors = {};
+    
+    if (!form.name.trim()) {
+      newErrors.name = "Project name is required";
+    }
+    
+    if (!form.description.trim()) {
+      newErrors.description = "Project description is required";
+    }
+    
+    if (!form.deadline) {
+      newErrors.deadline = "Project deadline is required";
+    }
+    
+    if (!form.teamMembers || form.teamMembers.length === 0) {
+      newErrors.teamMembers = "At least one team member must be selected";
+    }
+    
+    // If there are validation errors, set them and return
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error("Please fill in all required fields");
+      return;
+    }
+    
     try {
       // Convert status object to string for API and teamMembers to IDs
       const projectData = {
@@ -215,9 +262,14 @@ function AddProjectForm({ onProjectCreated }) {
           placeholder="Enter project name"
           value={form.name}
           onChange={handleChange}
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-200"
+          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-200 ${
+            errors.name ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+          }`}
           required
         />
+        {errors.name && (
+          <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+        )}
       </div>
 
                            <div>
@@ -230,10 +282,15 @@ function AddProjectForm({ onProjectCreated }) {
           placeholder="Brief project description"
           value={form.description}
           onChange={handleChange}
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-200"
+          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-200 ${
+            errors.description ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+          }`}
           rows={4}
           required
         />
+        {errors.description && (
+          <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+        )}
       </div>
 
                                                        <div>
@@ -347,7 +404,9 @@ function AddProjectForm({ onProjectCreated }) {
               placeholder="Select deadline date"
               readOnly
               onClick={() => setShowCalendar(!showCalendar)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white hover:bg-gray-50 cursor-pointer"
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white hover:bg-gray-50 cursor-pointer ${
+                errors.deadline ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
+              }`}
               required
             />
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -460,7 +519,10 @@ function AddProjectForm({ onProjectCreated }) {
             />
           )}
           
-          {form.deadline && (
+          {errors.deadline && (
+            <p className="text-red-500 text-sm mt-1">{errors.deadline}</p>
+          )}
+          {form.deadline && !errors.deadline && (
             <div className="mt-2 flex items-center space-x-2 text-sm text-gray-600">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               <span>Deadline set for: {new Date(form.deadline).toLocaleDateString('en-US', { 
@@ -492,12 +554,20 @@ function AddProjectForm({ onProjectCreated }) {
              control: (base, state) => ({
                ...base,
                minHeight: '42px',
-               border: state.isFocused ? '2px solid #16a34a' : '1px solid #d1d5db',
+               border: state.isFocused 
+                 ? '2px solid #16a34a' 
+                 : errors.teamMembers 
+                 ? '2px solid #dc2626' 
+                 : '1px solid #d1d5db',
                borderRadius: '8px',
                boxShadow: state.isFocused ? '0 0 0 3px rgba(22, 163, 74, 0.1)' : 'none',
                cursor: 'pointer',
                '&:hover': {
-                 border: '2px solid #16a34a'
+                 border: state.isFocused 
+                   ? '2px solid #16a34a' 
+                   : errors.teamMembers 
+                   ? '2px solid #dc2626' 
+                   : '2px solid #16a34a'
                }
              }),
              option: (base, state) => ({
@@ -610,6 +680,9 @@ function AddProjectForm({ onProjectCreated }) {
               </div>
             )}
          />
+         {errors.teamMembers && (
+           <p className="text-red-500 text-sm mt-1">{errors.teamMembers}</p>
+         )}
        </div>
 
       <button
