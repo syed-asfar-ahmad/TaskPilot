@@ -168,10 +168,11 @@ function AddProjectForm({ onProjectCreated }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Convert status object to string for API
+      // Convert status object to string for API and teamMembers to IDs
       const projectData = {
         ...form,
-        status: form.status.value
+        status: form.status.value,
+        teamMembers: form.teamMembers.map(member => member.value)
       };
       
       await createProject(projectData, token);
