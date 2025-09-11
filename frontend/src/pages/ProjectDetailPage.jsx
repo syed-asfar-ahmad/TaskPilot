@@ -647,9 +647,9 @@ function ProjectDetailPage() {
                   </h2>
                                      <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
                      <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden">
-                       {project.projectManager.profileImage ? (
+                       {project.projectManager.profilePicture ? (
                          <img 
-                           src={project.projectManager.profileImage} 
+                           src={project.projectManager.profilePicture} 
                            alt={project.projectManager.name}
                            className="w-full h-full object-cover"
                            onError={(e) => {
@@ -658,7 +658,10 @@ function ProjectDetailPage() {
                            }}
                          />
                        ) : null}
-                       <div className={`w-full h-full bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center ${project.projectManager.profileImage ? 'hidden' : 'flex'}`}>
+                       <div 
+                         className="w-full h-full bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center"
+                         style={{ display: project.projectManager.profilePicture ? 'none' : 'flex' }}
+                       >
                          <span className="text-white font-medium">
                            {project.projectManager.name?.charAt(0)?.toUpperCase() || 'P'}
                          </span>
@@ -687,9 +690,9 @@ function ProjectDetailPage() {
                                        {project.teamMembers?.map((member) => (
                       <div key={member._id} className="flex items-center gap-3 p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200 hover:shadow-md transition-all duration-200">
                         <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden">
-                          {member.profileImage ? (
+                          {member.profilePicture ? (
                             <img 
-                              src={member.profileImage} 
+                              src={member.profilePicture} 
                               alt={member.name}
                               className="w-full h-full object-cover"
                               onError={(e) => {
@@ -698,7 +701,10 @@ function ProjectDetailPage() {
                               }}
                             />
                           ) : null}
-                          <div className={`w-full h-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center ${member.profileImage ? 'hidden' : 'flex'}`}>
+                          <div 
+                            className="w-full h-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center"
+                            style={{ display: member.profilePicture ? 'none' : 'flex' }}
+                          >
                             <span className="text-white font-medium">
                               {member.name?.charAt(0)?.toUpperCase() || 'M'}
                             </span>

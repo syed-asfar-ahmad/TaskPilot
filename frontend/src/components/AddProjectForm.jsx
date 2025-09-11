@@ -78,13 +78,13 @@ function AddProjectForm({ onProjectCreated }) {
           teamRes = { data: allUsers };
         }
 
-                 const teamOptions = teamRes.data.map((member) => ({
-           value: member._id,
-           label: `${member.name} (${member.email})`,
-           profilePicture: member.profilePicture || null,
-           name: member.name,
-           email: member.email
-         }));
+        const teamOptions = teamRes.data.map((member) => ({
+          value: member._id,
+          label: `${member.name} (${member.email})`,
+          profilePicture: member.profilePicture || null,
+          name: member.name,
+          email: member.email
+        }));
 
         setTeamOptions(teamOptions);
       } catch (err) {
@@ -172,7 +172,7 @@ function AddProjectForm({ onProjectCreated }) {
       const projectData = {
         ...form,
         status: form.status.value,
-        teamMembers: form.teamMembers.map(member => member.value)
+        teamMembers: form.teamMembers // teamMembers are already IDs from handleTeamChange
       };
       
       await createProject(projectData, token);
@@ -189,7 +189,7 @@ function AddProjectForm({ onProjectCreated }) {
 
       if (onProjectCreated) onProjectCreated();
     } catch (err) {
-      toast.error("Failed to create project");
+      toast.error(`Failed to create project: ${err.response?.data?.error || err.message}`);
     }
   };
 
@@ -395,8 +395,8 @@ function AddProjectForm({ onProjectCreated }) {
                  <div className="p-3">
                    {/* Day Headers */}
                    <div className="grid grid-cols-7 gap-0.5 mb-2">
-                     {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
-                       <div key={day} className="text-center text-xs font-medium text-gray-500 py-1">
+                     {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
+                       <div key={`day-${index}`} className="text-center text-xs font-medium text-gray-500 py-1">
                          {day}
                        </div>
                      ))}
